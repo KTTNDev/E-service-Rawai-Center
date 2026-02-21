@@ -1,57 +1,83 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowLeft, Loader2, AlertCircle, Mail, Building2 } from 'lucide-react';
 
-export const AdminLogin = ({ onLogin, onGoogleLogin, onCancel }: { onLogin: (e: string, p: string) => void, onGoogleLogin: () => void, onCancel: () => void }) => {
+export const AdminLogin = ({ onLogin, onGoogleLogin, onCancel, loading, error }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const brandGradient = "linear-gradient(90deg, hsla(222, 51%, 34%, 1) 0%, hsla(119, 37%, 45%, 1) 100%)";
+
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    onLogin(email, password);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
-      <div className="bg-white p-8 rounded-[2rem] shadow-2xl w-full max-w-md animate-in zoom-in-95 duration-300">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-black text-slate-800">Admin Login</h3>
-          <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-            <X className="w-5 h-5"/>
-          </button>
-        </div>
-        <p className="text-sm text-slate-500 mb-6">เข้าสู่ระบบเพื่อจัดการเมนูและบริการออนไลน์</p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm font-sans">
+      <div className="w-full max-w-md animate-in zoom-in-95 duration-300 relative">
         
-        {/* แบบ Email/Password เดิม */}
-        <form onSubmit={(e) => { e.preventDefault(); onLogin(email, password); }} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Email</label>
-            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
-            <input type="password" value={password} onChange={e=>setPassword(e.target.value)} required className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" />
-          </div>
-          <button type="submit" className="w-full py-3 mt-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-colors">
-            เข้าสู่ระบบด้วย Email
-          </button>
-        </form>
-
-        {/* เส้นคั่น */}
-        <div className="relative flex items-center py-5">
-          <div className="flex-grow border-t border-slate-200"></div>
-          <span className="flex-shrink-0 mx-4 text-slate-400 text-xs font-bold uppercase tracking-widest">หรือ</span>
-          <div className="flex-grow border-t border-slate-200"></div>
-        </div>
-
-        {/* ปุ่มเข้าสู่ระบบด้วย Gmail */}
-        <button 
-          type="button" 
-          onClick={onGoogleLogin} 
-          className="w-full py-3 bg-white border-2 border-slate-100 hover:bg-slate-50 hover:border-slate-200 text-slate-700 rounded-xl font-bold transition-all flex items-center justify-center gap-3 shadow-sm"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          เข้าสู่ระบบด้วย Gmail
+        <button onClick={onCancel} className="absolute -top-12 left-0 inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-bold group">
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> กลับหน้าหลัก
         </button>
+
+        <div className="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden">
+          <div className="p-10 text-center bg-slate-50/50 border-b border-slate-100">
+            <div className="w-20 h-20 rounded-3xl bg-white shadow-md border border-slate-100 flex items-center justify-center mx-auto mb-6 text-blue-900">
+              <Building2 className="w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Staff Access</h2>
+            <p className="text-slate-500 text-[10px] font-black mt-1 uppercase tracking-[0.2em] opacity-70">ระบบจัดการดิจิทัลราไวย์</p>
+          </div>
+
+          <div className="p-10 space-y-6">
+            {/* 🚨 แจ้งเตือน Error กรณีอีเมลไม่อยู่ใน Whitelist หรือรหัสผิด */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-start gap-3 text-red-600 text-xs font-bold animate-in shake">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="leading-relaxed">{error}</p>
+              </div>
+            )}
+
+            {/* 🔴 ปุ่ม Login ด้วย Google */}
+            <button 
+              type="button"
+              onClick={onGoogleLogin}
+              disabled={loading}
+              className="w-full py-4 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95 disabled:opacity-50 shadow-sm"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+              <span className="font-bold text-slate-700">เข้าใช้งานด้วย Gmail</span>
+            </button>
+
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-slate-100"></div>
+              <span className="flex-shrink mx-4 text-[10px] font-black text-slate-300 uppercase">หรือใช้รหัสผ่าน</span>
+              <div className="flex-grow border-t border-slate-100"></div>
+            </div>
+
+            {/* ฟอร์ม Email/Password */}
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-2">อีเมลเจ้าหน้าที่</label>
+                <div className="relative group">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-blue-600 transition-colors" />
+                  <input required type="email" disabled={loading} className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white outline-none transition-all font-bold text-slate-700 disabled:opacity-50" placeholder="admin@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-2">รหัสผ่าน</label>
+                <div className="relative group">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-blue-600 transition-colors" />
+                  <input required type="password" disabled={loading} className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white outline-none transition-all font-bold text-slate-700 tracking-widest disabled:opacity-50" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+                </div>
+              </div>
+              <button type="submit" disabled={loading} className="w-full py-5 rounded-2xl text-white font-black text-lg shadow-xl transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3 mt-4" style={{ background: brandGradient }}>
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <ShieldCheck className="w-6 h-6" />}
+                {loading ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ'}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
