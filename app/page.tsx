@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Lock } from 'lucide-react';
 
-// 🔥 นำเข้าวิชา Firebase (เพิ่ม signInWithRedirect และ getRedirectResult สำหรับมือถือ)
+// 🔥 นำเข้าวิชา Firebase (เปลี่ยนกลับมาใช้ signInWithPopup แบบ CCTV)
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken, signInWithEmailAndPassword, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore, doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 
 // 🧩 นำเข้า Components
@@ -61,9 +61,6 @@ export default function RawaiPortal() {
     
     const initAuth = async () => {
       try {
-        // ✨ ดักจับผลลัพธ์จากการ Redirect ของมือถือ
-        await getRedirectResult(auth);
-
         const globalWindow = window as any;
         if (typeof globalWindow.__initial_auth_token !== 'undefined' && globalWindow.__initial_auth_token) {
           await signInWithCustomToken(auth, globalWindow.__initial_auth_token);
@@ -146,17 +143,19 @@ export default function RawaiPortal() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    // ✨ บังคับให้แสดงหน้าเลือกบัญชี Gmail ทุกครั้ง
+    // ✨ บังคับให้แสดงหน้าเลือกบัญชี Gmail ทุกครั้ง ไม่ให้ล็อกอินออโต้
     provider.setCustomParameters({
       prompt: 'select_account'
     });
     
     try {
-      // ✨ ใช้ signInWithRedirect แทน signInWithPopup เพื่อแก้ปัญหามือถือบล็อก Popup
-      await signInWithRedirect(auth, provider);
+      // ✨ ใช้ signInWithPopup เหมือนระบบ CCTV
+      await signInWithPopup(auth, provider);
     } catch (err: any) {
-      if (err.code !== 'auth/popup-closed-by-user') {
+      // ดัก error กรณีผู้ใช้กดยกเลิก popup เอง จะได้ไม่แจ้งเตือนกวนใจ
+      if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google");
+        console.error(err);
       }
     }
   };
@@ -213,8 +212,8 @@ export default function RawaiPortal() {
         services={services} 
         onToggle={toggleServiceStatus} 
         onAdd={addNewService} 
-        onEdit={editService}       // ส่ง Prop เข้าไปให้หน้าแอดมิน
-        onDelete={deleteService}   // ส่ง Prop เข้าไปให้หน้าแอดมิน
+        onEdit={editService}       
+        onDelete={deleteService}   
         onLogout={handleLogout} 
       />
     );
