@@ -17,7 +17,7 @@ export const HeroBanner = () => {
         </div>
         <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight mb-3 md:mb-4 leading-tight drop-shadow-md">
           ศูนย์รวม E-Service <br className="hidden md:block" />
-          <span className="text-emerald-300">ราไวย์</span>
+         <br></br> <span className="text-emerald-300">ราไวย์</span>
         </h1>
         <h2 className="text-sm md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 drop-shadow-sm px-2">
           เทศบาลตำบลราไวย์ อำเภอเมืองภูเก็ต จังหวัดภูเก็ต
