@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ShieldCheck, Lock } from 'lucide-react';
 
-// 🔥 นำเข้าวิชา Firebase (เปลี่ยนกลับมาใช้ signInWithPopup แบบ CCTV)
+// 🔥 นำเข้าวิชา Firebase
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, onAuthStateChanged, signOut, signInWithCustomToken, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore, doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 
-// 🧩 นำเข้า Components
+// 🧩 นำเข้า Components (ปรับ Path ให้ถูกต้อง)
 import { DEFAULT_SERVICES } from '../src/lib/constants';
 import { HeroBanner } from '../src/components/HeroBanner';
 import { ServiceCard } from '../src/components/ServiceCard';
 import { AdminLogin } from '../src/components/AdminLogin';
 import { AdminDashboard } from '../src/components/AdminDashboard';
 
-
+// --- ตั้งค่า Firebase ---
 const getFirebaseConfig = () => {
   if (typeof window !== 'undefined' && typeof (window as any).__firebase_config !== 'undefined') {
     return JSON.parse((window as any).__firebase_config);
@@ -49,12 +49,34 @@ const cleanBrokenUrls = (url: string) => {
   return match ? match[1] : url;
 };
 
-export default function RawaiPortal() {
-  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
+// ✨ เปลี่ยนชื่อ Component หลักเป็น App ตามมาตรฐานระบบ
+export default function App() {
+  const [services, setServices] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
-  
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isAdminView, setIsAdminView] = useState(false);
+
+  // ---------------------------------------------------------
+  // ✨ ระบบเรียงลำดับการ์ดอัตโนมัติ (Sorting Logic)
+  // ---------------------------------------------------------
+  const displayServices = useMemo(() => {
+    if (!services || services.length === 0) return [];
+    
+    return [...services].sort((a, b) => {
+      // 1. เรียงตามสถานะ isActive (Active ขึ้นก่อน)
+      if (a.isActive !== b.isActive) {
+        return a.isActive ? -1 : 1;
+      }
+      
+      // 2. ถ้าสถานะการใช้งานเหมือนกัน ให้ดูที่ isHighlight (Highlight ขึ้นก่อน)
+      if (a.isHighlight !== b.isHighlight) {
+        return a.isHighlight ? -1 : 1;
+      }
+      
+      // 3. ถ้าเท่ากันหมด ให้เรียงตามลำดับเดิมใน Database
+      return 0;
+    });
+  }, [services]);
 
   useEffect(() => {
     document.title = "ศูนย์รวม E-Service ราไวย์";
@@ -71,31 +93,25 @@ export default function RawaiPortal() {
     };
     initAuth();
 
-    // ตัวตรวจสอบสถานะล็อกอิน (ตรวจสอบอีเมลกับฐานข้อมูล)
+    // ตรวจสอบสถานะการเข้าสู่ระบบ
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser && !currentUser.isAnonymous) {
-        
         const userEmail = currentUser.email?.toLowerCase() || '';
-
         try {
-          // 🔒 ดึงรายชื่อ Admin จาก Firestore แทนการ Hardcode
           const adminDocRef = doc(db, getDbPath(), 'admin_config');
           const adminSnap = await getDoc(adminDocRef);
           
           let allowedEmails: string[] = [];
-          
           if (adminSnap.exists()) {
             allowedEmails = adminSnap.data().emails || [];
           } else {
-            // ถ้าระบบเพิ่งรันครั้งแรกและยังไม่มีฐานข้อมูลรายชื่อ ให้สร้างค่าตั้งต้นอัตโนมัติ
             allowedEmails = ['rawai.cctv@gmail.com', 'kittinanpolrob@gmail.com'];
             await setDoc(adminDocRef, { emails: allowedEmails });
           }
 
-          // เช็กว่าอีเมลที่ล็อกอินเข้ามา มีอยู่ในฐานข้อมูลหรือไม่
           if (userEmail && !allowedEmails.includes(userEmail)) {
-            await signOut(auth); // เตะออกทันที
+            await signOut(auth);
             setIsAdminView(false);
             alert(`❌ ไม่อนุญาตให้เข้าใช้งาน\nอีเมล ${currentUser.email} ไม่ได้รับสิทธิ์ผู้ดูแลระบบ`);
             return;
@@ -103,7 +119,6 @@ export default function RawaiPortal() {
 
           setIsAdminView(true);
           setShowLoginModal(false);
-
         } catch (error) {
           console.error("Error checking admin auth:", error);
           await signOut(auth);
@@ -143,19 +158,12 @@ export default function RawaiPortal() {
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    // ✨ บังคับให้แสดงหน้าเลือกบัญชี Gmail ทุกครั้ง ไม่ให้ล็อกอินออโต้
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
-      // ✨ ใช้ signInWithPopup เหมือนระบบ CCTV
       await signInWithPopup(auth, provider);
     } catch (err: any) {
-      // ดัก error กรณีผู้ใช้กดยกเลิก popup เอง จะได้ไม่แจ้งเตือนกวนใจ
       if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
         alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google");
-        console.error(err);
       }
     }
   };
@@ -170,9 +178,7 @@ export default function RawaiPortal() {
     const sanitizedData = newServicesData.map(item => {
       const cleanItem = { ...item };
       Object.keys(cleanItem).forEach(key => {
-        if (cleanItem[key] === undefined) {
-          delete cleanItem[key];
-        }
+        if (cleanItem[key] === undefined) delete cleanItem[key];
       });
       return cleanItem;
     });
@@ -192,7 +198,6 @@ export default function RawaiPortal() {
     saveToDatabase(updated);
   };
 
-  // ✨ ฟังก์ชันใหม่: ลบเมนู
   const deleteService = (serviceId: string) => {
     if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบเมนูนี้?')) {
       const updated = services.filter(s => s.id !== serviceId);
@@ -200,7 +205,6 @@ export default function RawaiPortal() {
     }
   };
 
-  // ✨ ฟังก์ชันใหม่: แก้ไขเมนู (อัปเดตข้อมูลทับของเดิม)
   const editService = (updatedService: any) => {
     const updated = services.map(s => s.id === updatedService.id ? updatedService : s);
     saveToDatabase(updated);
@@ -234,7 +238,8 @@ export default function RawaiPortal() {
 
       <div className="max-w-7xl mx-auto px-3 md:px-8 -mt-16 md:-mt-24 relative z-20">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-          {services.map((service, index) => (
+          {/* ✨ เปลี่ยนมาใช้ displayServices แทน services เพื่อให้ลำดับถูกต้อง */}
+          {displayServices.map((service, index) => (
             <ServiceCard key={service.id} service={service} index={index} />
           ))}
         </div>
