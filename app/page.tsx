@@ -252,7 +252,7 @@ export default function App() {
             <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-center">Smart City Portal • Data Privacy</p>
           </div>
           <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center px-4 flex items-center justify-center gap-2">
-            ลิขสิทธิ์ © 2026 เทศบาลตำบลราไวย์ อำเภอเมืองภูเก็ต จังหวัดภูเก็ต
+          พัฒนาโดย ทีมฝ่ายนโยบายและแผน เทศบาลตำบลราไวย์
             <button onClick={() => setShowLoginModal(true)} className="p-1 hover:bg-slate-200 rounded-full transition-colors opacity-30 hover:opacity-100" title="Admin Login">
               <Lock className="w-3 h-3" />
             </button>
