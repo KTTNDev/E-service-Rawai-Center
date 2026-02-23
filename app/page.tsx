@@ -221,7 +221,7 @@ export default function App() {
     );
   }
 
-  return (
+return (
     <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 text-slate-900 pb-20 overflow-hidden">
       
       {showLoginModal && (
@@ -236,12 +236,20 @@ export default function App() {
 
       <div className="max-w-7xl mx-auto px-3 md:px-8 -mt-16 md:-mt-24 relative z-20">
         
-        {/* 🚀 ส่วนแสดงสถานะการโหลด */}
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
-            <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-            <h3 className="text-lg font-bold text-slate-600">กรุณารอสักครู่</h3>
-            <p className="text-slate-400 text-sm">กำลังดาวน์โหลดข้อมูลเมนู...</p>
+          // ✨ Skeleton Screen: แสดงโครงสร้างการ์ดหลอกๆ 6 อันระหว่างรอโหลด
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white/80 rounded-3xl p-4 md:p-6 shadow-sm border border-slate-100 animate-pulse">
+                {/* วงกลมไอคอน */}
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-200 rounded-2xl mb-4"></div>
+                {/* เส้นหัวข้อ */}
+                <div className="h-4 bg-slate-200 rounded-full w-3/4 mb-3"></div>
+                {/* เส้นเนื้อหา */}
+                <div className="h-3 bg-slate-200 rounded-full w-full mb-2"></div>
+                <div className="h-3 bg-slate-200 rounded-full w-1/2"></div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
@@ -257,7 +265,6 @@ export default function App() {
           </div>
         )}
       </div>
-
       <div className="max-w-4xl mx-auto px-6 mt-16 md:mt-32 text-center relative z-10">
         <div className="flex flex-col items-center justify-center space-y-3 md:space-y-4">
           <div className="flex items-center gap-2 md:gap-3 text-slate-400">
