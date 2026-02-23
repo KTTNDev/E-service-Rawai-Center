@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { ShieldCheck, Lock } from 'lucide-react';
+import { ShieldCheck, Lock, Loader2 } from 'lucide-react'; // นำเข้า Loader2 มาทำ icon หมุนๆ
 
 // 🔥 นำเข้าวิชา Firebase
 import { initializeApp } from 'firebase/app';
@@ -42,38 +42,27 @@ const getDbPath = () => {
   return 'rawai_eservice'; 
 };
 
-// 🧹 ฟังก์ชันช่วยล้างลิงก์ที่พังจากฐานข้อมูล 
 const cleanBrokenUrls = (url: string) => {
   if (!url) return ""; 
   const match = url.match(/\[.*?\]\((.*?)\)/);
   return match ? match[1] : url;
 };
 
-// ✨ เปลี่ยนชื่อ Component หลักเป็น App ตามมาตรฐานระบบ
 export default function App() {
   const [services, setServices] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isAdminView, setIsAdminView] = useState(false);
+  
+  // ⏳ เพิ่ม State สำหรับการโหลด
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ---------------------------------------------------------
-  // ✨ ระบบเรียงลำดับการ์ดอัตโนมัติ (Sorting Logic)
-  // ---------------------------------------------------------
   const displayServices = useMemo(() => {
     if (!services || services.length === 0) return [];
     
     return [...services].sort((a, b) => {
-      // 1. เรียงตามสถานะ isActive (Active ขึ้นก่อน)
-      if (a.isActive !== b.isActive) {
-        return a.isActive ? -1 : 1;
-      }
-      
-      // 2. ถ้าสถานะการใช้งานเหมือนกัน ให้ดูที่ isHighlight (Highlight ขึ้นก่อน)
-      if (a.isHighlight !== b.isHighlight) {
-        return a.isHighlight ? -1 : 1;
-      }
-      
-      // 3. ถ้าเท่ากันหมด ให้เรียงตามลำดับเดิมใน Database
+      if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
+      if (a.isHighlight !== b.isHighlight) return a.isHighlight ? -1 : 1;
       return 0;
     });
   }, [services]);
@@ -93,7 +82,6 @@ export default function App() {
     };
     initAuth();
 
-    // ตรวจสอบสถานะการเข้าสู่ระบบ
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser && !currentUser.isAnonymous) {
@@ -132,6 +120,10 @@ export default function App() {
 
   useEffect(() => {
     if (!user) return;
+    
+    // เริ่มต้นโหลดข้อมูล
+    setIsLoading(true);
+
     const docRef = doc(db, getDbPath(), 'menu_config');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -144,7 +136,13 @@ export default function App() {
       } else {
         setDoc(docRef, { items: DEFAULT_SERVICES });
       }
+      // โหลดเสร็จแล้ว ปิด Loading
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Snapshot error:", error);
+      setIsLoading(false); // ปิด Loading แม้จะ error เพื่อไม่ให้ค้าง
     });
+
     return () => unsubscribe();
   }, [user]);
 
@@ -237,12 +235,27 @@ export default function App() {
       <HeroBanner />
 
       <div className="max-w-7xl mx-auto px-3 md:px-8 -mt-16 md:-mt-24 relative z-20">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-          {/* ✨ เปลี่ยนมาใช้ displayServices แทน services เพื่อให้ลำดับถูกต้อง */}
-          {displayServices.map((service, index) => (
-            <ServiceCard key={service.id} service={service} index={index} />
-          ))}
-        </div>
+        
+        {/* 🚀 ส่วนแสดงสถานะการโหลด */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-white/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
+            <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
+            <h3 className="text-lg font-bold text-slate-600">กรุณารอสักครู่</h3>
+            <p className="text-slate-400 text-sm">กำลังดาวน์โหลดข้อมูลเมนู...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+            {displayServices.length > 0 ? (
+              displayServices.map((service, index) => (
+                <ServiceCard key={service.id} service={service} index={index} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-10 text-slate-400">
+                ไม่พบข้อมูลเมนูในขณะนี้
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto px-6 mt-16 md:mt-32 text-center relative z-10">
@@ -252,7 +265,7 @@ export default function App() {
             <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-center">Smart City Portal • Data Privacy</p>
           </div>
           <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center px-4 flex items-center justify-center gap-2">
-          พัฒนาโดย ทีมฝ่ายนโยบายและแผน เทศบาลตำบลราไวย์
+            พัฒนาโดย ทีมฝ่ายนโยบายและแผน เทศบาลตำบลราไวย์
             <button onClick={() => setShowLoginModal(true)} className="p-1 hover:bg-slate-200 rounded-full transition-colors opacity-30 hover:opacity-100" title="Admin Login">
               <Lock className="w-3 h-3" />
             </button>
