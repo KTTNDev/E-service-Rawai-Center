@@ -32,11 +32,10 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
-
-/* สำหรับ Mobile ที่บางเครื่องไม่รองรับ background-attachment: fixed */
 @media (max-width: 768px) {
   .parallax-bg {
-    background-attachment: scroll; /* ปรับเป็นปกติในมือถือเพื่อป้องกันรูปแตก */
+    /* ปรับเป็น scroll ในมือถือเพื่อให้รูปกึ่งกลางเป๊ะและไม่ซูมจนแตกครับ */
+    background-attachment: scroll !important;
   }
 }
 /* แอนิเมชันของลอย */
