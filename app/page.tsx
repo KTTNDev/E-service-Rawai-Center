@@ -220,10 +220,14 @@ export default function App() {
       />
     );
   }
-
 return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 text-slate-900 pb-20 overflow-hidden">
+    <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-emerald-100 text-slate-900 pb-20 relative overflow-x-hidden">
       
+      {/* พื้นหลังลายตาราง (Grid Pattern) */}
+      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2v-4h4v-2H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}>
+      </div>
+
       {showLoginModal && (
         <AdminLogin 
           onLogin={handleAdminLogin} 
@@ -234,47 +238,49 @@ return (
 
       <HeroBanner />
 
-      <div className="max-w-7xl mx-auto px-3 md:px-8 -mt-16 md:-mt-24 relative z-20">
+      {/* ส่วนเนื้อหาหลัก ปรับลบระยะขอบให้ขยับขึ้นไปเกยกับ Banner มากขึ้น */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-20 md:-mt-32 relative z-20">
         
         {isLoading ? (
-          // ✨ Skeleton Screen: แสดงโครงสร้างการ์ดหลอกๆ 6 อันระหว่างรอโหลด
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white/80 rounded-3xl p-4 md:p-6 shadow-sm border border-slate-100 animate-pulse">
-                {/* วงกลมไอคอน */}
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-slate-200 rounded-2xl mb-4"></div>
-                {/* เส้นหัวข้อ */}
-                <div className="h-4 bg-slate-200 rounded-full w-3/4 mb-3"></div>
-                {/* เส้นเนื้อหา */}
+              <div key={i} className="glass-card rounded-[2.5rem] p-6 md:p-8 animate-pulse">
+                <div className="w-16 h-16 bg-slate-200 rounded-3xl mb-6"></div>
+                <div className="h-5 bg-slate-200 rounded-full w-3/4 mb-4"></div>
                 <div className="h-3 bg-slate-200 rounded-full w-full mb-2"></div>
-                <div className="h-3 bg-slate-200 rounded-full w-1/2"></div>
+                <div className="h-3 bg-slate-200 rounded-full w-2/3"></div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10">
             {displayServices.length > 0 ? (
               displayServices.map((service, index) => (
-                <ServiceCard key={service.id} service={service} index={index} />
+                // เพิ่ม wrapper เพื่อให้แต่ละการ์ดขยับไม่พร้อมกันเล็กน้อย (Fake Parallax)
+                <div key={service.id} className="transition-transform duration-500 hover:-translate-y-2">
+                   <ServiceCard service={service} index={index} />
+                </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-10 text-slate-400">
+              <div className="col-span-full glass-card rounded-3xl py-20 text-center text-slate-400 font-bold">
                 ไม่พบข้อมูลเมนูในขณะนี้
               </div>
             )}
           </div>
         )}
       </div>
-      <div className="max-w-4xl mx-auto px-6 mt-16 md:mt-32 text-center relative z-10">
-        <div className="flex flex-col items-center justify-center space-y-3 md:space-y-4">
-          <div className="flex items-center gap-2 md:gap-3 text-slate-400">
-            <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
-            <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-center">Smart City Portal • Data Privacy</p>
+
+      {/* Footer ที่ดูเบาบางลง */}
+      <div className="max-w-4xl mx-auto px-6 mt-24 text-center relative z-10">
+        <div className="inline-flex flex-col items-center p-8 rounded-[3rem] bg-white/30 backdrop-blur-sm border border-white/20">
+          <div className="flex items-center gap-3 text-slate-400 mb-4">
+            <ShieldCheck className="w-6 h-6 text-emerald-500" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Secure Gateway</p>
           </div>
-          <p className="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center px-4 flex items-center justify-center gap-2">
-            พัฒนาโดย ทีมฝ่ายนโยบายและแผน เทศบาลตำบลราไวย์
-            <button onClick={() => setShowLoginModal(true)} className="p-1 hover:bg-slate-200 rounded-full transition-colors opacity-30 hover:opacity-100" title="Admin Login">
-              <Lock className="w-3 h-3" />
+          <p className="text-[9px] md:text-[11px] text-slate-500 font-bold uppercase tracking-widest flex items-center gap-3">
+            ฝ่ายนโยบายและแผน เทศบาลตำบลราไวย์
+            <button onClick={() => setShowLoginModal(true)} className="p-2 hover:bg-emerald-100 hover:text-emerald-600 rounded-full transition-all opacity-40 hover:opacity-100 shadow-sm">
+              <Lock className="w-4 h-4" />
             </button>
           </p>
         </div>
