@@ -13,63 +13,66 @@ export const ServiceCard = ({ service, index }: { service: any, index: number })
   return (
     <CardWrapper 
       {...linkProps}
-      // ปรับ Container ให้เป็นแบบกะทัดรัด (Compact) และมี Overflow Hidden เพื่อตัดลายน้ำที่ล้นออก
-      className={`group relative p-5 md:p-6 rounded-[2.5rem] transition-all duration-500 flex flex-col h-full overflow-hidden active:scale-95 border min-h-[160px] md:min-h-[190px]
+      className={`group relative p-5 md:p-6 rounded-[2.5rem] transition-all duration-500 flex flex-col h-full overflow-hidden active:scale-95 border min-h-[170px] md:min-h-[200px]
         ${!isActive ? 'bg-slate-50 border-slate-200 opacity-70 grayscale cursor-not-allowed' : 
           isSpecial ? 'bg-white border-emerald-500/20 shadow-md hover:shadow-2xl hover:border-emerald-500/40 hover:-translate-y-2' : 
           'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:border-slate-200 hover:-translate-y-2'
         }`}
       style={{ animationDelay: `${index * 40}ms` }}
     >
-      {/* 🟢 1. พื้นหลังเรืองแสงตอน Hover */}
+      {/* 🟢 1. Glow Effect ตอน Hover */}
       {isActive && (
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/0 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0" />
       )}
 
-      {/* 🖼️ 2. ลายน้ำขนาดใหญ่ยักษ์ (โผล่มาเกินครึ่งช่องตามที่จารย์สั่ง) */}
-      {/* ปรับขนาดเป็น w-64 h-64 และตำแหน่งให้โผล่มาจากมุมขวาล่างแบบเน้นๆ */}
-      <div className={`absolute -bottom-20 -right-20 w-56 h-56 md:w-60 md:h-60 transition-all duration-700 pointer-events-none z-0 
-        ${isActive ? 'group-hover:scale-110 group-hover:-rotate-12 opacity-[0.5] text-emerald-600' : 'opacity-[0.03] text-slate-900'}`}
+      {/* 🖼️ 2. ลายน้ำวงกลมหลุดขอบ (ปรับให้ภาพเต็มวง) */}
+      <div className={`absolute -bottom-16 -right-16 w-45 h-45 md:w-55 md:h-55 rounded-full transition-all duration-700 pointer-events-none z-0 
+        flex items-center justify-center overflow-hidden border border-slate-100/50 shadow-inner
+        ${isActive ? 'group-hover:scale-110 group-hover:-rotate-12 opacity-[0.25] bg-emerald-50/30' : 'opacity-[0.06] bg-slate-100/50'}`}
       >
-        {service.imageUrl && isActive ? (
-          // แสดงรูปจริงแบบจางๆ ไม่แวปขาวแล้ว
-          <img src={service.imageUrl} alt={service.name} className="w-full h-full object-contain -rotate-12" />
-        ) : (
-          <ServiceIcon className="w-full h-full -rotate-12" />
-        )}
+        {/* ✅ ปรับจาก w-2/3 h-2/3 เป็น w-full h-full เพื่อให้ภาพเต็มวง */}
+        <div className="w-full h-full flex items-center justify-center">
+           {service.imageUrl && isActive ? (
+             <img 
+               src={service.imageUrl} 
+               alt={service.name} 
+               // ใช้ object-cover เพื่อให้ภาพถมเต็มวงกลม หรือ object-contain ถ้าไม่อยากให้ภาพโดนตัดขอบ
+               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+             />
+           ) : (
+             <ServiceIcon className={`w-1/2 h-1/2 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+           )}
+        </div>
       </div>
 
-      {/* 📝 3. ส่วนเนื้อหา (Foreground) */}
+      {/* 📝 3. ส่วนเนื้อหาด้านบน (Foreground) */}
       <div className="relative z-10 flex flex-col h-full pointer-events-none">
-        {/* Badge & Top Row */}
         <div className="flex justify-between items-start mb-3">
-          {/* เว้นพื้นที่ไอคอนข้างบนให้โล่งขึ้นเพื่อให้ลายน้ำข้างหลังดูเด่น */}
           <div className="flex-1" /> 
           {service.badge && (
-            <span className={`px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-sm ${service.badgeColor || 'bg-slate-900 text-white'}`}>
+            <span className={`px-3 py-1 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-sm ${service.badgeColor || 'bg-slate-900 text-white'}`}>
               {service.badge}
             </span>
           )}
         </div>
 
-        {/* รายละเอียดเมนู */}
         <div className="flex-1 mb-4">
-          <h3 className={`text-base md:text-lg font-black mb-1 tracking-tight transition-colors line-clamp-1
+          <h3 className={`text-base md:text-lg font-black mb-1.5 tracking-tight transition-colors line-clamp-1
             ${!isActive ? 'text-slate-500' : isSpecial ? 'text-emerald-900 group-hover:text-emerald-600' : 'text-slate-800 group-hover:text-emerald-600'}`}>
             {service.name}
           </h3>
-          <p className="text-[11px] md:text-xs font-medium text-slate-400 leading-relaxed line-clamp-2 max-w-[85%]">
+          <p className="text-[11px] md:text-xs font-medium text-slate-400 leading-relaxed line-clamp-2 max-w-[80%]">
             {service.description}
           </p>
         </div>
 
-        {/* 🔘 4. ส่วนปุ่มกดด้านล่าง */}
+        {/* 🔘 4. ปุ่ม Action ด้านล่าง */}
         <div className={`mt-auto flex items-center justify-between font-bold text-[10px] uppercase tracking-widest transition-all
           ${!isActive ? 'text-slate-400' : 'text-emerald-500'}`}>
           {isActive ? (
             <>
-              <span className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">คลิกใช้งาน</span>
-              <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-inner border border-slate-100">
+              <span className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">คลิกเข้าใช้งาน</span>
+              <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm border border-slate-100">
                 <ArrowRight className="w-4 h-4" />
               </div>
             </>
