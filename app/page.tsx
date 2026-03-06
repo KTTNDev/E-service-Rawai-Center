@@ -153,15 +153,23 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Modal Login */}
-      {showLoginModal && (
-        <AdminLogin 
-          onLogin={async (e, p) => { try { await signInWithEmailAndPassword(auth, e, p); } catch { alert("ผิดพลาด!"); } }} 
-          onGoogleLogin={async () => { const provider = new GoogleAuthProvider(); await signInWithPopup(auth, provider); }} 
-          onCancel={() => setShowLoginModal(false)} 
-        />
-      )}
-
+     {showLoginModal && (
+  <AdminLogin 
+    // ✅ ระบุ Type เป็น string ให้กับ parameter e และ p
+    onLogin={async (e: string, p: string) => { 
+      try { 
+        await signInWithEmailAndPassword(auth, e, p); 
+      } catch { 
+        alert("ผิดพลาด!"); 
+      } 
+    }} 
+    onGoogleLogin={async () => { 
+      const provider = new GoogleAuthProvider(); 
+      await signInWithPopup(auth, provider); 
+    }} 
+    onCancel={() => setShowLoginModal(false)} 
+  />
+)}
       <HeroBanner />
 
       {/* Grid ของเมนูที่ลอยเกยขึ้นไปบน Banner */}
