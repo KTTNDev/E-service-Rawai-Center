@@ -16,7 +16,7 @@ export const HeroBanner = () => {
     >
       <div className="relative z-10 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-1000">
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-6 leading-tight drop-shadow-2xl">
-          เข้าถึงทุกบริการ E-Service <br />
+          เข้าถึงทุกบริการ<br /> E-Service <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">
             เทศบาลตำบลราไวย์
           </span>
